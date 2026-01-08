@@ -116,7 +116,7 @@ export default function NewProjectPage() {
                 <div className="mt-8">
                     <h3 className="text-lg font-semibold mb-4">Prior Art (Top Matches)</h3>
                     <div className="grid gap-3">
-                        {noveltyReport.prior_art.map((paper, i) => (
+                        {(noveltyReport.prior_art || []).map((paper, i) => (
                             <div key={i} className="flex items-start justify-between p-4 rounded-lg border bg-card/50">
                                 <div>
                                     <p className="font-medium text-sm">{paper.title}</p>

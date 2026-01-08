@@ -43,7 +43,7 @@ async def analyze_novelty(topic: str, api_key: str):
         return {
             "score": 0,
             "reasoning": "Could not find sufficient prior art to compare. This might be extremely novel or a search error.",
-            "similar_papers": []
+            "prior_art": []
         }
 
     # 2. Construct Prompt for Gemini
