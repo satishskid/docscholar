@@ -134,12 +134,12 @@ class AIGateway:
         # If API key changes or not set, re-init (simple strategy)
         if api_key and api_key != AIGateway._current_api_key:
              AIGateway._current_api_key = api_key
-             if AIModelConfig.PROVIDER == "groq":
-                 # Use GROQ_API_KEY from env usually, but here we might pass it
-                 # For the context of this app, we reuse the key passed or env
-                 groq_key = api_key # or os.getenv("GROQ_API_KEY")
-                 AIGateway._provider_instance = GroqProvider(groq_key)
+             
+             # Auto-detect Groq Key
+             if api_key.startswith("gsk_"):
+                 AIGateway._provider_instance = GroqProvider(api_key)
              else:
+                 # Default to Gemini
                  AIGateway._provider_instance = GeminiProvider(api_key)
         
         if not AIGateway._provider_instance:

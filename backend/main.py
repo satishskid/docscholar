@@ -47,10 +47,16 @@ async def get_drive_service_dep(x_google_drive_token: str = Header(None)):
     except Exception as e:
         raise HTTPException(status_code=401, detail=f"Invalid Drive Token: {str(e)}")
 
-async def get_gemini_key_dep(x_gemini_key: str = Header(None)):
-    if not x_gemini_key:
-        raise HTTPException(status_code=401, detail="Missing X-Gemini-Key header")
-    return x_gemini_key
+async def get_gemini_key_dep(
+    x_gemini_key: Optional[str] = Header(None),
+    x_groq_key: Optional[str] = Header(None)
+):
+    if x_groq_key:
+        return x_groq_key
+    if x_gemini_key:
+        return x_gemini_key
+    
+    raise HTTPException(status_code=401, detail="Missing X-Gemini-Key or X-Groq-Key header")
 
 @app.get("/")
 async def root():
@@ -517,24 +523,21 @@ async def import_paper(
 @app.post("/api/v1/research/novelty")
 async def check_novelty_endpoint(
     item: dict = Body(...),
-    x_gemini_key: Optional[str] = Header(None)
+    api_key: str = Depends(get_gemini_key_dep)
 ):
     from agents.novelty import analyze_novelty
     
     topic = item.get("topic")
     if not topic:
         raise HTTPException(status_code=400, detail="Topic is required")
-        
-    if not x_gemini_key:
-         raise HTTPException(status_code=400, detail="Gemini API Key is required in headers")
 
-    result = await analyze_novelty(topic, x_gemini_key)
+    result = await analyze_novelty(topic, api_key)
     return result
 
 @app.post("/api/v1/research/matrix")
 async def generate_matrix_endpoint(
     item: dict = Body(...),
-    x_gemini_key: Optional[str] = Header(None)
+    api_key: str = Depends(get_gemini_key_dep)
 ):
     from agents.matrix import generate_matrix
     
@@ -542,15 +545,12 @@ async def generate_matrix_endpoint(
     if not papers or not isinstance(papers, list):
          raise HTTPException(status_code=400, detail="List of papers is required")
 
-    if not x_gemini_key:
-         raise HTTPException(status_code=400, detail="Gemini API Key is required in headers")
-
-    return await generate_matrix(papers, x_gemini_key)
+    return await generate_matrix(papers, api_key)
 
 @app.post("/api/v1/research/protocol")
 async def generate_protocol_endpoint(
     item: dict = Body(...),
-    x_gemini_key: Optional[str] = Header(None)
+    api_key: str = Depends(get_gemini_key_dep)
 ):
     from agents.protocol import generate_protocol
     
@@ -560,10 +560,7 @@ async def generate_protocol_endpoint(
     if not pico or not title:
          raise HTTPException(status_code=400, detail="PICO and Title are required")
 
-    if not x_gemini_key:
-         raise HTTPException(status_code=400, detail="Gemini API Key is required in headers")
-
-    return await generate_protocol(pico, title, x_gemini_key)
+    return await generate_protocol(pico, title, api_key)
 
 @app.post("/api/v1/ai/editor_command")
 async def editor_command_endpoint(
