@@ -156,8 +156,12 @@ class AIGateway:
     def get_fast_model(api_key: Optional[str] = None):
         """Returns a wrapper usable by legacy agents."""
         provider = AIGateway.get_provider(api_key)
-        model_name = AIModelConfig.get_fast_model_name()
         
+        if isinstance(provider, GroqProvider):
+            model_name = AIModelConfig.GROQ_FAST_MODEL
+        else:
+            model_name = AIModelConfig.GEMINI_FAST_MODEL
+            
         class ProviderModelWrapper:
             def __init__(self, provider, model):
                 self.provider = provider
@@ -172,7 +176,11 @@ class AIGateway:
     def get_reasoning_model(api_key: Optional[str] = None):
         """Returns a wrapper for reasoning model."""
         provider = AIGateway.get_provider(api_key)
-        model_name = AIModelConfig.get_reasoning_model_name()
+        
+        if isinstance(provider, GroqProvider):
+             model_name = "llama3-70b-8192" # Fallback/Reasoning for Groq
+        else:
+             model_name = AIModelConfig.GEMINI_REASONING_MODEL
         
         class ProviderModelWrapper:
             def __init__(self, provider, model):
