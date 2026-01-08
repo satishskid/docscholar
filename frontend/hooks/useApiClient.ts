@@ -3,8 +3,18 @@ import { useAuth } from '@/context/AuthContext';
 import { useEffect } from 'react';
 import { getAuthToken } from '@/utils/googleDrive';
 
+// Ensure we always have /api/v1, whether from env or default
+const getBaseUrl = () => {
+    let url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+    if (!url.endsWith('/api/v1')) {
+        // Handle potential trailing slash in domain
+        url = url.endsWith('/') ? url + 'api/v1' : url + '/api/v1';
+    }
+    return url;
+};
+
 const api = axios.create({
-    baseURL: 'http://localhost:8000/api/v1', // FastAPI Backend URL
+    baseURL: getBaseUrl(),
 });
 
 export const useApiClient = () => {

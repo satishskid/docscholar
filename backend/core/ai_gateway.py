@@ -9,7 +9,7 @@ class LLMProvider(ABC):
     """Abstract base class for LLM providers."""
     
     @abstractmethod
-    def generate_content(self, model_name: str, contents: Any) -> Any:
+    def generate_content(self, model_name: str, contents: Any, **kwargs) -> Any:
         pass
 
     @abstractmethod
@@ -22,10 +22,10 @@ class GeminiProvider(LLMProvider):
     def __init__(self, api_key: str):
         self.client = genai.Client(api_key=api_key)
 
-    def generate_content(self, model_name: str, contents: Any) -> Any:
+    def generate_content(self, model_name: str, contents: Any, **kwargs) -> Any:
         # Wrap response to match expectation (object with .text)
         try:
-            return self.client.models.generate_content(model=model_name, contents=contents)
+            return self.client.models.generate_content(model=model_name, contents=contents, config=kwargs.get('generation_config'))
         except Exception as e:
             raise e
 
@@ -48,7 +48,7 @@ class GroqProvider(LLMProvider):
     def __init__(self, api_key: str):
         self.client = groq.Groq(api_key=api_key)
 
-    def generate_content(self, model_name: str, contents: Any) -> Any:
+    def generate_content(self, model_name: str, contents: Any, **kwargs) -> Any:
         # Map generic 'contents' to Groq messages
         # valid input: str or list of strings
         messages = []
@@ -163,8 +163,8 @@ class AIGateway:
                 self.provider = provider
                 self.model = model
             
-            def generate_content(self, contents):
-                return self.provider.generate_content(self.model, contents)
+            def generate_content(self, contents, **kwargs):
+                return self.provider.generate_content(self.model, contents, **kwargs)
 
         return ProviderModelWrapper(provider, model_name)
 
@@ -179,8 +179,8 @@ class AIGateway:
                 self.provider = provider
                 self.model = model
             
-            def generate_content(self, contents):
-                return self.provider.generate_content(self.model, contents)
+            def generate_content(self, contents, **kwargs):
+                return self.provider.generate_content(self.model, contents, **kwargs)
                      
         return ProviderModelWrapper(provider, model_name)
 
