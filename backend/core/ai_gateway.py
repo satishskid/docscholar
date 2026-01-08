@@ -95,8 +95,8 @@ class AIModelConfig:
     GEMINI_EMBEDDING_MODEL = "models/text-embedding-004"
     
     # Groq Models
-    GROQ_FAST_MODEL = "llama3-70b-8192"
-    GROQ_REASONING_MODEL = "mixtral-8x7b-32768"
+    GROQ_FAST_MODEL = "llama-3.3-70b-versatile"
+    GROQ_REASONING_MODEL = "llama-3.1-8b-instant" # or another reasoning capable model
 
     # Local Models
     LOCAL_MODEL_PATH = "google/t5-gemma-2-4b"
@@ -178,7 +178,7 @@ class AIGateway:
         provider = AIGateway.get_provider(api_key)
         
         if isinstance(provider, GroqProvider):
-             model_name = "llama3-70b-8192" # Fallback/Reasoning for Groq
+             model_name = AIModelConfig.GROQ_REASONING_MODEL 
         else:
              model_name = AIModelConfig.GEMINI_REASONING_MODEL
         
