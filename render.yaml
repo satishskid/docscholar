@@ -1,0 +1,24 @@
+services:
+  # -------------------------
+  # BACKEND (Python FastAPI)
+  # -------------------------
+  - type: web
+    name: docscholar-backend
+    env: docker
+    region: oregon
+    plan: free
+    rootDir: .
+    # If using Docker (Recommended for portability)
+    dockerfilePath: backend/Dockerfile
+    # If using Native Python on Render:
+    # buildCommand: pip install -r requirements.txt
+    # startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        sync: false # Set manually in Render Dashboard (Neon connection string)
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: PYTHON_VERSION
+        value: 3.11.0

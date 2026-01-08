@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+google-auth
+google-api-python-client
+pydantic
+google-genai
+groq
+pypdf
+python-multipart
+numpy
+httpx
+asyncpg
+psycopg2-binary
+sqlalchemy
+greenlet
+pgvector
+python-dotenv
