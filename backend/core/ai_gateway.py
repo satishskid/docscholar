@@ -4,6 +4,8 @@ from abc import ABC, abstractmethod
 import os
 from typing import Optional, List, Dict, Any
 import groq
+import re
+import json
 
 class LLMProvider(ABC):
     """Abstract base class for LLM providers."""
@@ -209,3 +211,27 @@ class AIGateway:
             content=content,
             task_type=task_type
         )
+
+    @staticmethod
+    def extract_json_from_text(text: str) -> Dict[str, Any]:
+        """
+        Robustly extracts JSON object from text, handling Markdown blocks.
+        """
+        # 1. Remove Markdown code blocks
+        text = text.replace("```json", "").replace("```", "").strip()
+        
+        # 2. Try direct parse
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError:
+            pass
+            
+        # 3. Regex search for first { and last }
+        match = re.search(r"(\{.*\})", text, re.DOTALL)
+        if match:
+            try:
+                return json.loads(match.group(1))
+            except:
+                pass
+        
+        raise ValueError("Could not extract valid JSON from model response.")

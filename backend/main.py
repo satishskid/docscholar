@@ -248,9 +248,8 @@ Do not output markdown, only valid JSON.
 """
     try:
         response = model.generate_content(prompt)
-        # Cleanup potential markdown code blocks
-        text = response.text.replace("```json", "").replace("```", "").strip()
-        data = json.loads(text)
+        # Use robust extraction
+        data = AIGateway.extract_json_from_text(response.text)
         return data
     except Exception as e:
         print(f"PICO Generation Error: {e}")

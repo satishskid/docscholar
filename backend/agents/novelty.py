@@ -80,8 +80,8 @@ async def analyze_novelty(topic: str, api_key: str):
     try:
         response = model.generate_content(prompt, generation_config={"response_mime_type": "application/json"})
         ai_analysis =  response.text
-        import json
-        analysis_json = json.loads(ai_analysis)
+        # Use robust extraction
+        analysis_json = AIGateway.extract_json_from_text(ai_analysis)
         
         return {
             **analysis_json,
