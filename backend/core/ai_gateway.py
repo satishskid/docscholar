@@ -215,23 +215,25 @@ class AIGateway:
     @staticmethod
     def extract_json_from_text(text: str) -> Dict[str, Any]:
         """
-        Robustly extracts JSON object from text, handling Markdown blocks.
+        Robustly extracts JSON object from text, handling Markdown blocks and trailing text.
         """
         # 1. Remove Markdown code blocks
         text = text.replace("```json", "").replace("```", "").strip()
         
-        # 2. Try direct parse
+        # 2. Find the first '{'
+        start_idx = text.find('{')
+        if start_idx == -1:
+             raise ValueError("No JSON object found (missing '{').")
+             
+        text = text[start_idx:]
+        
+        # 3. Use raw_decode to parse just the first valid JSON object
         try:
-            return json.loads(text)
-        except json.JSONDecodeError:
+            obj, _ = json.JSONDecoder().raw_decode(text)
+            return obj
+        except json.JSONDecodeError as e:
+            # Fallback: Try regex if raw_decode fails strictly (though raw_decode is usually best for trailing data)
+            # Maybe the JSON is malformed inside.
             pass
             
-        # 3. Regex search for first { and last }
-        match = re.search(r"(\{.*\})", text, re.DOTALL)
-        if match:
-            try:
-                return json.loads(match.group(1))
-            except:
-                pass
-        
         raise ValueError("Could not extract valid JSON from model response.")

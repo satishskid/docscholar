@@ -22,13 +22,14 @@ app = FastAPI(title="Aiper Backend")
 import os
 origins = [
     "http://localhost:3000",
-    "https://docscholar-frontend.netlify.app", # Example Netlify URL
-    # We can also allow all for the demo phase to ensure smooth connection
+    "https://docscholar.netlify.app",
+    "https://docscholar-frontend.netlify.app",
     "*"
 ]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # For 'No Issue' deployment assurance in this phase
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -161,19 +162,23 @@ async def init_user(service = Depends(get_drive_service_dep)):
     """
     Checks for config.json, creates folder structure if missing.
     """
-    # Check for config.json
-    files = list_files_in_folder(service, q_filter="name = 'config.json'")
-    if not files:
-        # Create config.json
-        initial_config = {"onboarded": True}
-        upload_json(service, initial_config, "config.json")
-    
-    # Check for 'projects' folder
-    projects_folders = list_files_in_folder(service, q_filter="name = 'projects' and mimeType = 'application/vnd.google-apps.folder'")
-    if not projects_folders:
-        create_folder(service, 'projects')
+    try:
+        # Check for config.json
+        files = list_files_in_folder(service, q_filter="name = 'config.json'")
+        if not files:
+            # Create config.json
+            initial_config = {"onboarded": True}
+            upload_json(service, initial_config, "config.json")
         
-    return {"status": "initialized"}
+        # Check for 'projects' folder
+        projects_folders = list_files_in_folder(service, q_filter="name = 'projects' and mimeType = 'application/vnd.google-apps.folder'")
+        if not projects_folders:
+            create_folder(service, 'projects')
+            
+        return {"status": "initialized"}
+    except Exception as e:
+        print(f"Init User Error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to initialize user: {str(e)}")
 
 @app.get("/api/v1/projects")
 async def list_projects(db: Session = Depends(get_db)):
